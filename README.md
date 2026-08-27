@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+JCC CITY ALTAR
 
 TODO: Document your project here
 # jcc-city-altar
