@@ -7,7 +7,7 @@ TypeScript REST API for the public contact form and authenticated admin dashboar
 1. Install Node.js 20+ and PostgreSQL.
 2. From this directory, run `npm install`.
 3. Copy `.env.example` to `.env` or use the provided values in this workspace.
-4. Set `DATABASE_URL`, `ADMIN_JWT_SECRET`, `ADMIN_API_PORT`, `ADMIN_ORIGIN`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` before running the app.
+4. Set `DATABASE_URL`, `ADMIN_JWT_SECRET`, `ADMIN_API_PORT`, `ADMIN_ORIGIN`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` before running the app. For profile image uploads, also set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 5. Run `npm run prisma:generate` and `npm run prisma:migrate -- --name init`.
 6. Seed the admin user with `npm run db:seed`.
 7. Start the public API with `npm run dev` and the admin API with `npm run dev:admin`.
@@ -17,6 +17,10 @@ For deployments, apply checked-in migrations with `npx prisma migrate deploy` fr
 The public API listens on port 3000 by default, while the admin API listens on `ADMIN_API_PORT` (default 3100). In development, the admin frontend proxies `/api` requests to `http://localhost:3100`; leave `VITE_ADMIN_API_URL` unset so browser requests remain same-origin. Set `ADMIN_ORIGIN` to the exact URL used to open the admin app.
 
 Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, and `CONTACT_NOTIFICATION_TO` to enable email notifications. `TRUST_PROXY_HOPS` should be set to the exact number of trusted reverse-proxy hops in production.
+
+Profile images are stored in a private Supabase Storage bucket named `feedback-profile-images` by default. To set it up, set `SUPABASE_URL` and the server-only `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env`, then run `npm run supabase:setup` from `backend/`. This creates the configured private bucket with a 2 MB limit and JPEG, PNG, and WebP content types; if the bucket already exists but is public, the command stops and asks you to make it private. Never expose the service-role key in either frontend.
+
+New submissions store the image object path and MIME type in PostgreSQL. For an existing deployment, apply migrations with `npx prisma migrate deploy` and generate the client with `npm run prisma:generate` before starting either API. After configuring Supabase, run `npm run db:migrate-profile-images` once to move legacy image bytes from PostgreSQL into the bucket. The migration is safe to rerun; the legacy database column is retained until you separately verify and remove it in a later schema migration.
 
 ## Public endpoint
 

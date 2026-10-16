@@ -43,6 +43,7 @@ model Feedback {
   name             String         @db.VarChar(80)
   message          String         @db.VarChar(2000)
   profileImage     Bytes?
+  profileImagePath String?        @db.VarChar(255)
   profileImageType String?        @db.VarChar(16)
   status           FeedbackStatus @default(PENDING)
   featured         Boolean        @default(false)

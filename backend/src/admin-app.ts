@@ -7,6 +7,7 @@ import { getAllowedOrigins, normalizeOrigin } from "./middleware/auth-middleware
 import { createAdminAuthRouter } from "./routes/admin-auth.js";
 import { createAdminContactsRouter } from "./routes/admin-contacts.js";
 import { createAdminFeedbackRouter } from "./routes/admin-feedback.js";
+import type { ProfileImageStorage } from "./profile-image-storage.js";
 import { sendContactReply } from "./mailer.js";
 
 type AdminAppOptions = {
@@ -15,6 +16,7 @@ type AdminAppOptions = {
   adminOrigin?: string;
   secureCookies?: boolean;
   sendReply?: (submission: ContactSubmission, message: string) => Promise<void>;
+  profileImageStorage?: ProfileImageStorage;
 };
 
 export function createAdminApp({
@@ -23,6 +25,7 @@ export function createAdminApp({
   adminOrigin = process.env.ADMIN_ORIGIN ?? "http://localhost:5174",
   secureCookies,
   sendReply = sendContactReply,
+  profileImageStorage,
 }: AdminAppOptions) {
   const app = express();
   const allowedOrigins = getAllowedOrigins(adminOrigin);
@@ -42,7 +45,7 @@ export function createAdminApp({
 
   app.use("/api/admin/auth", createAdminAuthRouter(prisma, jwtSecret, adminOrigin, secureCookies));
   app.use("/api/admin/contacts", createAdminContactsRouter(prisma, jwtSecret, adminOrigin, sendReply));
-  app.use("/api/admin/feedback", createAdminFeedbackRouter(prisma, jwtSecret, adminOrigin));
+  app.use("/api/admin/feedback", createAdminFeedbackRouter(prisma, jwtSecret, adminOrigin, profileImageStorage));
 
   const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
     if (error instanceof SyntaxError && "status" in error && error.status === 400 && "body" in error) {

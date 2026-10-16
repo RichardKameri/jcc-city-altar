@@ -6,12 +6,14 @@ import type { ContactSubmission, PrismaClient } from "@prisma/client";
 import { contactSubmissionSchema } from "./contact-validation.js";
 import { decodeProfileImage, feedbackSubmissionSchema } from "./feedback-validation.js";
 import { notifyContact } from "./mailer.js";
+import type { ProfileImageStorage } from "./profile-image-storage.js";
 
 type AppOptions = {
   prisma: Pick<PrismaClient, "contactSubmission" | "feedback">;
   notify?: (submission: ContactSubmission) => Promise<void>;
   logger?: Pick<Console, "error">;
   rateLimitOptions?: Partial<Options>;
+  profileImageStorage?: ProfileImageStorage;
 };
 
 export function createApp({
@@ -19,6 +21,7 @@ export function createApp({
   notify = notifyContact,
   logger = console,
   rateLimitOptions = {},
+  profileImageStorage,
 }: AppOptions) {
   const app = express();
 
@@ -53,18 +56,38 @@ export function createApp({
         return;
       }
 
+      let uploadedProfileImagePath: string | undefined;
       try {
+        const feedbackId = profileImage && imageBytes ? crypto.randomUUID() : undefined;
+        const profileImagePath = profileImage && imageBytes
+          ? `${feedbackId}.${profileImage.mimeType === "image/jpeg" ? "jpg" : profileImage.mimeType.slice(6)}`
+          : undefined;
+        if (profileImagePath && !profileImageStorage) {
+          response.status(503).json({ error: "Profile image storage is not configured" });
+          return;
+        }
+        if (profileImagePath && profileImage && imageBytes && profileImageStorage) {
+          await profileImageStorage.upload(profileImagePath, imageBytes, profileImage.mimeType);
+          uploadedProfileImagePath = profileImagePath;
+        }
+
         const feedback = await prisma.feedback.create({
           data: {
+            ...(feedbackId ? { id: feedbackId } : {}),
             ...feedbackData,
             ...(profileImage && imageBytes
-              ? { profileImage: imageBytes, profileImageType: profileImage.mimeType }
+              ? { profileImagePath, profileImageType: profileImage.mimeType }
               : {}),
           },
           select: { id: true, createdAt: true },
         });
+        uploadedProfileImagePath = undefined;
         response.status(201).json(feedback);
       } catch (error) {
+        if (uploadedProfileImagePath && profileImageStorage) {
+          await profileImageStorage.remove(uploadedProfileImagePath)
+            .catch((cleanupError) => logger.error("Profile image cleanup failed", cleanupError));
+        }
         next(error);
       }
     },
@@ -135,16 +158,29 @@ export function createApp({
       try {
         const feedback = await prisma.feedback.findUnique({
           where: { id: id.data },
-          select: { status: true, featured: true, profileImage: true, profileImageType: true },
+          select: {
+            status: true,
+            featured: true,
+            profileImage: true,
+            profileImagePath: true,
+            profileImageType: true,
+          },
         });
-        if (!feedback?.profileImage || !feedback.profileImageType ||
+        if ((!feedback?.profileImage && !feedback?.profileImagePath) || !feedback.profileImageType ||
           feedback.status !== "APPROVED" || !feedback.featured) {
           response.status(404).json({ error: "Profile picture not found" });
           return;
         }
+        const imageBytes = feedback.profileImagePath
+          ? await profileImageStorage?.download(feedback.profileImagePath)
+          : feedback.profileImage;
+        if (!imageBytes) {
+          response.status(503).json({ error: "Profile image storage is not configured" });
+          return;
+        }
         response.set("Content-Type", feedback.profileImageType);
         response.set("Cache-Control", "public, max-age=3600");
-        response.send(feedback.profileImage);
+        response.send(Buffer.from(imageBytes));
       } catch (error) {
         next(error);
       }

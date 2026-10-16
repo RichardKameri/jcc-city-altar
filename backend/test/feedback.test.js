@@ -13,12 +13,13 @@ function setup({
   create = async ({ data }) => ({ id: "feedback-id", createdAt: new Date(), ...data }),
   findMany = async () => [],
   findUnique = async () => null,
+  profileImageStorage,
 } = {}) {
   const prisma = {
     contactSubmission: { create: async ({ data }) => ({ id: "contact-id", ...data }) },
     feedback: { create, findMany, findUnique },
   };
-  return createApp({ prisma });
+  return createApp({ prisma, profileImageStorage });
 }
 
 test("validates and sanitizes feedback before storing it", () => {
@@ -63,11 +64,17 @@ test("public feedback listing includes only approved featured feedback", async (
   assert.equal(response.body.data.length, 1);
 });
 
-test("public feedback submission validates and stores image bytes", async () => {
+test("public feedback submission stores profile images in external storage", async () => {
   const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0x00]);
   let stored;
+  let uploaded;
   const app = setup({
     create: async ({ data }) => { stored = data; return { id: "feedback-id", createdAt: new Date() }; },
+    profileImageStorage: {
+      upload: async (path, bytes, contentType) => { uploaded = { path, bytes, contentType }; },
+      download: async () => new Uint8Array(),
+      remove: async () => {},
+    },
   });
 
   const response = await request(app).post("/api/feedback").send({
@@ -76,8 +83,12 @@ test("public feedback submission validates and stores image bytes", async () => 
   });
 
   assert.equal(response.status, 201);
-  assert.deepEqual(Buffer.from(stored.profileImage), imageBytes);
+  assert.match(stored.profileImagePath, /^[0-9a-f-]+\.jpg$/);
+  assert.equal(stored.profileImage, undefined);
   assert.equal(stored.profileImageType, "image/jpeg");
+  assert.equal(uploaded.path, stored.profileImagePath);
+  assert.deepEqual(Buffer.from(uploaded.bytes), imageBytes);
+  assert.equal(uploaded.contentType, "image/jpeg");
 });
 
 test("rejects profile images with mismatched file content", async () => {
@@ -104,6 +115,32 @@ test("serves a profile picture only after feedback approval and featuring", asyn
   const response = await request(app).get("/api/feedback/123e4567-e89b-42d3-a456-426614174003/profile-picture");
 
   assert.equal(response.status, 200);
+  assert.equal(response.headers["content-type"], "image/jpeg");
+  assert.deepEqual(response.body, imageBytes);
+});
+
+test("serves Supabase-stored profile pictures only after approval and featuring", async () => {
+  const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0x00]);
+  let requestedPath;
+  const app = setup({
+    findUnique: async () => ({
+      status: "APPROVED",
+      featured: true,
+      profileImage: null,
+      profileImagePath: "feedback-id.jpg",
+      profileImageType: "image/jpeg",
+    }),
+    profileImageStorage: {
+      upload: async () => {},
+      download: async (path) => { requestedPath = path; return new Uint8Array(imageBytes); },
+      remove: async () => {},
+    },
+  });
+
+  const response = await request(app).get("/api/feedback/123e4567-e89b-42d3-a456-426614174003/profile-picture");
+
+  assert.equal(response.status, 200);
+  assert.equal(requestedPath, "feedback-id.jpg");
   assert.equal(response.headers["content-type"], "image/jpeg");
   assert.deepEqual(response.body, imageBytes);
 });

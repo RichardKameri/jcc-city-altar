@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { createApp } from "./app.js";
+import { createProfileImageStorage } from "./profile-image-storage.js";
 
 const prisma = new PrismaClient();
-const app = createApp({ prisma });
+const profileImageStorage = createProfileImageStorage();
+const app = createApp({ prisma, profileImageStorage });
 const port = Number(process.env.PORT || 3000);
 const trustedProxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
 

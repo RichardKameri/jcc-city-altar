@@ -3,6 +3,7 @@ import { FeedbackStatus, type Feedback, type PrismaClient } from "@prisma/client
 import { Router, type Response } from "express";
 import { z } from "zod";
 import { isAdmin, requireAdminOrigin } from "../middleware/auth-middleware.js";
+import type { ProfileImageStorage } from "../profile-image-storage.js";
 
 const feedbackIdSchema = z.string().uuid();
 const listQuerySchema = z.object({
@@ -78,6 +79,7 @@ export function createAdminFeedbackRouter(
   prisma: Pick<PrismaClient, "feedback" | "user">,
   jwtSecret: string | undefined,
   adminOrigin: string,
+  profileImageStorage?: ProfileImageStorage,
 ) {
   const router = Router();
   router.use(requireAdminOrigin(adminOrigin));
@@ -142,15 +144,22 @@ export function createAdminFeedbackRouter(
     try {
       const feedback = await prisma.feedback.findUnique({
         where: { id: id.data },
-        select: { profileImage: true, profileImageType: true },
+        select: { profileImage: true, profileImagePath: true, profileImageType: true },
       });
-      if (!feedback?.profileImage || !feedback.profileImageType) {
+      if ((!feedback?.profileImage && !feedback?.profileImagePath) || !feedback.profileImageType) {
         response.status(404).json({ error: "Profile picture not found" });
+        return;
+      }
+      const imageBytes = feedback.profileImagePath
+        ? await profileImageStorage?.download(feedback.profileImagePath)
+        : feedback.profileImage;
+      if (!imageBytes) {
+        response.status(503).json({ error: "Profile image storage is not configured" });
         return;
       }
       response.set("Content-Type", feedback.profileImageType);
       response.set("Cache-Control", "private, no-store");
-      response.send(feedback.profileImage);
+      response.send(Buffer.from(imageBytes));
     } catch (error) {
       next(error);
     }

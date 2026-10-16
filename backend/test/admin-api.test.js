@@ -15,7 +15,7 @@ const FEEDBACK_ID = "123e4567-e89b-42d3-a456-426614174003";
 const ADMIN_PASSWORD = "correct-horse-battery-staple";
 const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 4);
 
-function setup({ role = UserRole.ADMIN, deleteContact, updateContact, sendReply } = {}) {
+function setup({ role = UserRole.ADMIN, deleteContact, updateContact, sendReply, profileImageStorage, feedbackImage } = {}) {
   const calls = {};
   const feedbackItems = [{
     id: FEEDBACK_ID,
@@ -24,6 +24,10 @@ function setup({ role = UserRole.ADMIN, deleteContact, updateContact, sendReply 
     status: "PENDING",
     featured: false,
     createdAt: new Date(),
+    profileImage: null,
+    profileImagePath: null,
+    profileImageType: null,
+    ...feedbackImage,
   }];
   const users = [
     { id: ADMIN_ID, email: "admin@example.com", passwordHash, role, createdAt: new Date() },
@@ -117,7 +121,14 @@ function setup({ role = UserRole.ADMIN, deleteContact, updateContact, sendReply 
     },
     $transaction: async (callback) => callback(prisma),
   };
-  const app = createAdminApp({ prisma, jwtSecret: JWT_SECRET, adminOrigin: ADMIN_ORIGIN, secureCookies: false, sendReply });
+  const app = createAdminApp({
+    prisma,
+    jwtSecret: JWT_SECRET,
+    adminOrigin: ADMIN_ORIGIN,
+    secureCookies: false,
+    sendReply,
+    profileImageStorage,
+  });
   return { app, calls, users, invitations };
 }
 
@@ -272,6 +283,29 @@ test("feedback moderation requires admin authentication", async () => {
   const { app } = setup();
   const response = await request(app).get("/api/admin/feedback");
   assert.equal(response.status, 401);
+});
+
+test("admins can retrieve a profile picture from Supabase storage", async () => {
+  const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0x00]);
+  let requestedPath;
+  const { app } = setup({
+    feedbackImage: { profileImagePath: "feedback-id.jpg", profileImageType: "image/jpeg" },
+    profileImageStorage: {
+      upload: async () => {},
+      download: async (path) => { requestedPath = path; return new Uint8Array(imageBytes); },
+      remove: async () => {},
+    },
+  });
+
+  const response = await request(app)
+    .get(`/api/admin/feedback/${FEEDBACK_ID}/profile-picture`)
+    .set("Cookie", sessionCookie())
+    .set("Origin", ADMIN_ORIGIN);
+
+  assert.equal(response.status, 200);
+  assert.equal(requestedPath, "feedback-id.jpg");
+  assert.equal(response.headers["content-type"], "image/jpeg");
+  assert.deepEqual(response.body, imageBytes);
 });
 
 test("admins can download a PDF containing all feedback submissions", async () => {

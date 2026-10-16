@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { createAdminApp } from "./admin-app.js";
 import { assertJwtSecret } from "./middleware/auth-middleware.js";
+import { createProfileImageStorage } from "./profile-image-storage.js";
 
 const prisma = new PrismaClient();
 const jwtSecret = process.env.ADMIN_JWT_SECRET;
@@ -9,7 +10,8 @@ assertJwtSecret(jwtSecret);
 
 const port = Number(process.env.ADMIN_API_PORT || 3100);
 const adminOrigin = process.env.ADMIN_ORIGIN || "http://localhost:5174";
-const app = createAdminApp({ prisma, jwtSecret, adminOrigin });
+const profileImageStorage = createProfileImageStorage();
+const app = createAdminApp({ prisma, jwtSecret, adminOrigin, profileImageStorage });
 const server = app.listen(port, () => {
   console.info(`Admin API listening on port ${port}; allowed origin: ${adminOrigin}`);
 });

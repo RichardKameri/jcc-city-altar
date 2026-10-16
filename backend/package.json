@@ -10,12 +10,15 @@
     "start": "node dist/server.js",
     "start:admin": "node dist/admin-server.js",
     "test": "node --import tsx --test test/*.test.js",
+    "db:migrate-profile-images": "tsx src/migrate-profile-images.ts",
+    "supabase:setup": "tsx src/setup-profile-image-storage.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@supabase/supabase-js": "^2.57.4",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
