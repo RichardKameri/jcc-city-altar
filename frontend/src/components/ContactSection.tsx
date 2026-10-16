@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Globe } from "lucide-react";
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
 
 // ✅ Static data lives outside the component (no hooks, no problem)
 const socialLinks = [
@@ -82,6 +81,7 @@ const ContactSection = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
@@ -90,33 +90,28 @@ const ContactSection = () => {
   // ✅ FIX 3: status state is now declared (was used in JSX but missing entirely)
   const [status, setStatus] = useState(""); // "success" | "error" | ""
 
-  // ✅ FIX 4: No TypeScript type annotations — this is a .jsx file
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ FIX 5: handleSubmit is inside the component, sets status, no alert()
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus(""); // reset status on each new attempt
 
     try {
-      await emailjs.send(
-        "YOUR_SERVICE_ID",   // replace with your EmailJS service ID
-        "YOUR_TEMPLATE_ID",  // replace with your EmailJS template ID
-        {
-          from_name: formData.name,
-          from_email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-        },
-        "YOUR_PUBLIC_KEY"    // replace with your EmailJS public key
-      );
+      const response = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      // ✅ FIX 6: Set status instead of using alert()
+      if (!response.ok) {
+        throw new Error("Contact submission failed");
+      }
+
       setStatus("success");
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch (error) {
       console.error(error);
       setStatus("error");
@@ -204,6 +199,16 @@ const ContactSection = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
+                type="tel"
+                name="phone"
+                placeholder="Phone number (optional)"
+                value={formData.phone}
+                onChange={handleChange}
+                autoComplete="tel"
+                className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+
+              <input
                 type="text"
                 name="name"
                 placeholder="Your Name"
@@ -251,7 +256,6 @@ const ContactSection = () => {
                 {loading ? "Sending..." : "Send Message"}
               </button>
 
-              {/* ✅ FIX 7: Inline status feedback — no alert() popups */}
               {status === "success" && (
                 <p className="text-green-500 text-sm text-center">
                   ✅ Message sent successfully! We'll be in touch soon.

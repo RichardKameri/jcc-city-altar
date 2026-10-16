@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Church, Heart, Users } from "lucide-react";
 import theme2026 from "@/assets/theme-2026.jpg";
+import FeedbackSection from "./FeedbackSection";
 
 const stats = [
   { value: "4+", label: "Years of Ministry" },
@@ -100,6 +101,7 @@ const AboutSection = () => {
             <p className="text-accent font-body font-bold mt-2 text-lg">— Romans 8:19 KJV</p>
           </div>
         </motion.div>
+        <FeedbackSection />
       </div>
     </section>
   );

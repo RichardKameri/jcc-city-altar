@@ -1,0 +1,41 @@
+# Contact API
+
+TypeScript REST API for the public contact form and authenticated admin dashboard. It stores submissions in PostgreSQL with Prisma, sends a notification through SMTP when configured, and exposes a separate admin API protected by JWT session cookies and database-backed role checks.
+
+## Setup
+
+1. Install Node.js 20+ and PostgreSQL.
+2. From this directory, run `npm install`.
+3. Copy `.env.example` to `.env` or use the provided values in this workspace.
+4. Set `DATABASE_URL`, `ADMIN_JWT_SECRET`, `ADMIN_API_PORT`, `ADMIN_ORIGIN`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` before running the app.
+5. Run `npm run prisma:generate` and `npm run prisma:migrate -- --name init`.
+6. Seed the admin user with `npm run db:seed`.
+7. Start the public API with `npm run dev` and the admin API with `npm run dev:admin`.
+
+For deployments, apply checked-in migrations with `npx prisma migrate deploy` from this directory before starting the API.
+
+The public API listens on port 3000 by default, while the admin API listens on `ADMIN_API_PORT` (default 3100). In development, the admin frontend proxies `/api` requests to `http://localhost:3100`; leave `VITE_ADMIN_API_URL` unset so browser requests remain same-origin. Set `ADMIN_ORIGIN` to the exact URL used to open the admin app.
+
+Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, and `CONTACT_NOTIFICATION_TO` to enable email notifications. `TRUST_PROXY_HOPS` should be set to the exact number of trusted reverse-proxy hops in production.
+
+## Public endpoint
+
+`POST /api/contacts` accepts JSON with `name`, `email`, `subject`, and `message`. Successful submissions return `201 Created`; invalid input returns `400`, rate-limited clients receive `429`, and unexpected errors return a generic `500` response. Requests are limited to five per 15 minutes per client IP.
+
+When deployed behind a reverse proxy, set `TRUST_PROXY_HOPS` to the exact number of trusted proxy hops so Express can determine client IPs correctly. Do not set it to an unrestricted value.
+
+Run API tests with `npm test`; the tests use a lightweight Prisma substitute and do not require a database.
+
+## Admin API
+
+Admin routes are protected by a JWT session cookie named `jcc_admin_session` and require the authenticated user to have the `ADMIN` role in the database. Each request must also match the configured `ADMIN_ORIGIN` to prevent cross-origin access. Seed the first administrator with the database seed command. After that, an authenticated administrator can create a one-time signup invitation from the dashboard; share the generated link directly with its intended recipient. Invitations are bound to the specified email address, expire after 24 hours, and can only be used once. Signup requires a password of at least 14 characters. Invitation tokens are stored as hashes and are never sent by email automatically.
+
+- `POST /api/admin/auth/login` accepts `{ "email": "admin@example.com", "password": "..." }` and sets an `HttpOnly` session cookie.
+- `POST /api/admin/auth/invitations` requires an admin session and accepts `{ "email": "new-admin@example.com" }`. It returns a one-time signup URL and its expiration time.
+- `POST /api/admin/auth/signup` accepts `{ "token": "...", "password": "at-least-fourteen-characters" }` from a valid invitation and creates an `ADMIN` account.
+- `GET /api/admin/auth/me` returns the current admin user.
+- `POST /api/admin/auth/logout` clears the session.
+- `GET /api/admin/contacts?page=1&limit=20&search=alex&status=PENDING` lists newest first. Search matches name or email; `limit` is capped at 100.
+- `PATCH /api/admin/contacts/:id` accepts `{ "status": "PENDING" }`, `{ "status": "IN_PROGRESS" }`, or `{ "status": "RESPONDED" }`.
+- `DELETE /api/admin/contacts/:id` deletes a submission and returns `204`.
+- `GET /api/admin/contacts/stats` returns `totalRequests`, `pendingCount`, `inProgressCount`, and `respondedCount`.

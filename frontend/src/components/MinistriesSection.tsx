@@ -134,7 +134,7 @@ const ministries = [
   {
     icon: BookOpen,
     image: hbc1,
-    title: "Home Bible Church Ministry",
+    title: "GCC - Great Commission Cellgroup",
     slug: "hbc",
     desc: "The Media Ministry plays a crucial role in spreading the Gospel through technology and creative content. This ministry manages audio-visual needs during services, live streaming, social media, photography, and graphic design. It ensures that the message of Christ reaches people both inside and outside the church."
   },
