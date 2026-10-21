@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const jwtSecret = process.env.ADMIN_JWT_SECRET;
 assertJwtSecret(jwtSecret);
 
-const port = Number(process.env.ADMIN_API_PORT || 3100);
+const port = Number(process.env.PORT || process.env.ADMIN_API_PORT || 3100);
 const adminOrigin = process.env.ADMIN_ORIGIN || "http://localhost:5174";
 const profileImageStorage = createProfileImageStorage();
 const app = createAdminApp({ prisma, jwtSecret, adminOrigin, profileImageStorage });

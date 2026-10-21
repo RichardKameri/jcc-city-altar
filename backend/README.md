@@ -14,6 +14,14 @@ TypeScript REST API for the public contact form and authenticated admin dashboar
 
 For deployments, apply checked-in migrations with `npx prisma migrate deploy` from this directory before starting the API.
 
+## Deployment
+
+The repository includes a Render Blueprint for the public API. For the first deployment phase, connect the repository to Render and create the `jcc-city-altar-api` service from `render.yaml`. Set `DATABASE_URL` to the Supabase PostgreSQL connection string and set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; the service-role key must stay in Render's server-side environment. The admin API and both frontends are deployed in later phases.
+
+In Cloudflare Pages, create two projects from this repository: set the public project root to `frontend` and the admin project root to `admin`; use `npm run build` and `dist` for both. The checked-in `_redirects` files proxy `/api` requests to the Render services, preserving same-origin admin cookies. The Render service names in those files must match the names in `render.yaml` if you rename either service. Set `ADMIN_ORIGIN` after the admin Pages project has its stable `*.pages.dev` URL; update it if you later attach a custom domain.
+
+Before deploying the API, point `backend/.env` at the Supabase PostgreSQL database, run `npx prisma migrate deploy`, and seed the initial admin with `npm run db:seed`. If you need to preserve existing contact, feedback, and admin records from another PostgreSQL database, export/import that data separately; migrations create the schema but do not copy application records. Keep `ADMIN_EMAIL` and `ADMIN_PASSWORD` available only to the one-time seed command, not the frontend. Free-tier services may sleep or have usage limits, so verify the current provider limits before relying on them for production.
+
 The public API listens on port 3000 by default, while the admin API listens on `ADMIN_API_PORT` (default 3100). In development, the admin frontend proxies `/api` requests to `http://localhost:3100`; leave `VITE_ADMIN_API_URL` unset so browser requests remain same-origin. Set `ADMIN_ORIGIN` to the exact URL used to open the admin app.
 
 Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, and `CONTACT_NOTIFICATION_TO` to enable email notifications. `TRUST_PROXY_HOPS` should be set to the exact number of trusted reverse-proxy hops in production.

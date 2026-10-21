@@ -1,0 +1,24 @@
+envVarGroups:
+  - name: jcc-city-altar-backend
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_PROFILE_IMAGE_BUCKET
+        value: feedback-profile-images
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+
+services:
+  - type: web
+    name: jcc-city-altar-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run prisma:generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - fromGroup: jcc-city-altar-backend
