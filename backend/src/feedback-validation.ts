@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sanitizedText } from "./contact-validation.js";
 
-const MAX_PROFILE_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_PROFILE_IMAGE_BYTES = 10 * 1024 * 1024;
 const MAX_PROFILE_IMAGE_BASE64_LENGTH = Math.ceil(MAX_PROFILE_IMAGE_BYTES / 3) * 4;
 
 export const feedbackSubmissionSchema = z.object({

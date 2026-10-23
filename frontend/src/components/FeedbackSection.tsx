@@ -83,9 +83,9 @@ export default function FeedbackSection() {
       setSubmitError("Choose a JPEG, PNG, or WebP image.");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       setProfileImage(null);
-      setSubmitError("Profile pictures must be 2 MB or smaller.");
+      setSubmitError("Profile pictures must be 10 MB or smaller.");
       return;
     }
 
@@ -233,7 +233,7 @@ export default function FeedbackSection() {
                 }}
                 className="block w-full rounded-lg border border-border bg-background px-3 py-2 font-body text-sm file:mr-4 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:font-medium"
               />
-              <p className="font-body text-xs text-muted-foreground">JPEG, PNG, or WebP; 2 MB maximum. The picture is only shown if your feedback is approved and selected.</p>
+              <p className="font-body text-xs text-muted-foreground">JPEG, PNG, or WebP; 10 MB maximum. The picture is only shown if your feedback is approved and selected.</p>
               {profileImage && (
                 <div className="flex items-center gap-3 pt-2">
                   <img src={profileImage.previewUrl} alt="Selected profile preview" className="size-14 rounded-full border border-border object-cover" />

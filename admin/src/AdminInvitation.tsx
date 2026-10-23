@@ -55,50 +55,94 @@ export default function AdminInvitation() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-5 py-12 text-slate-950">
-      <section className="w-full max-w-lg border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
-        <Link to="/" className="mb-7 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-950">
-          <ArrowLeft size={16} /> Back to requests
-        </Link>
-        <div className="mb-5 grid size-12 place-items-center bg-slate-900 text-amber-300">
-          <UserPlus size={20} />
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-card">
+        <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-between gap-4 px-4 sm:px-7">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
+              <UserPlus size={19} aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">JCC City Altar Admin</p>
+              <p className="text-xs text-muted-foreground">Administrator access</p>
+            </div>
+          </div>
+          <Link to="/" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span className="hidden sm:inline">Back to requests</span>
+            <span className="sm:hidden">Back</span>
+          </Link>
         </div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">Administration</p>
-        <h1 className="text-3xl font-semibold">Invite an administrator</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Create a one-time signup link for a new administrator. The link expires after 24 hours; share it only with the intended person.
-        </p>
+      </header>
 
-        <form onSubmit={submit} className="mt-7 space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="invite-email" className="text-sm font-medium">New administrator email</label>
-            <Input
-              id="invite-email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </div>
-          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-          <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? "Creating invitation…" : "Create invitation"}
-          </Button>
-        </form>
+      <section className="mx-auto max-w-4xl px-4 py-9 sm:px-7 sm:py-12">
+        <div className="max-w-2xl">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Administration</p>
+          <h1 className="text-3xl font-semibold sm:text-4xl">Invite an administrator</h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
+            Create a one-time signup link for a new administrator. It expires after 24 hours, so share it only with the intended person.
+          </p>
+        </div>
 
-        {invitation && (
-          <div className="mt-6 space-y-3 border border-slate-200 bg-slate-50 p-4">
-            <p role="status" className="text-sm font-medium text-emerald-800">
-              Invitation created for {invitation.email}. Expires {new Date(invitation.expiresAt).toLocaleString()}.
-            </p>
-            <label htmlFor="invitation-link" className="text-sm font-medium">Signup link</label>
-            <Input id="invitation-link" readOnly value={invitation.invitationUrl} onFocus={(event) => event.currentTarget.select()} />
-            <Button type="button" variant="outline" onClick={copyInvitation}>
-              <Copy size={16} /> {copied ? "Copied" : "Copy invitation link"}
-            </Button>
+        <section aria-labelledby="invite-form-title" className="mt-8 border border-border border-l-4 border-l-primary bg-card p-5 shadow-sm sm:p-7">
+          <div className="mb-6 flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+              <UserPlus size={19} aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="invite-form-title" className="text-lg font-semibold">New administrator</h2>
+              <p className="mt-1 text-sm text-muted-foreground">The invitation will be bound to this email address.</p>
+            </div>
           </div>
-        )}
+
+          <form onSubmit={submit} className="space-y-5">
+            <div className="space-y-2">
+              <label htmlFor="invite-email" className="text-sm font-medium">Administrator email</label>
+              <Input
+                id="invite-email"
+                type="email"
+                autoComplete="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                className="h-12 max-w-xl"
+              />
+            </div>
+            {error && <p role="alert" className="border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>}
+            <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">Link expires 24 hours after it is created.</p>
+              <Button type="submit" className="w-full sm:w-auto sm:min-w-48" disabled={submitting}>
+                <UserPlus size={16} />
+                {submitting ? "Creating invitation…" : "Create invitation"}
+              </Button>
+            </div>
+          </form>
+
+          {invitation && (
+            <div className="mt-6 border border-primary/30 bg-primary/5 p-4 sm:p-5">
+              <p role="status" className="text-sm leading-6">
+                <span className="font-semibold text-primary">Invitation created.</span>{" "}
+                Send the link to {invitation.email} before {new Date(invitation.expiresAt).toLocaleString()}.
+              </p>
+              <div className="mt-4 space-y-2">
+                <label htmlFor="invitation-link" className="text-sm font-medium">One-time signup link</label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    id="invitation-link"
+                    readOnly
+                    value={invitation.invitationUrl}
+                    onFocus={(event) => event.currentTarget.select()}
+                    className="font-mono text-xs"
+                  />
+                  <Button type="button" variant="outline" onClick={copyInvitation} className="shrink-0">
+                    <Copy size={16} /> {copied ? "Copied" : "Copy link"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
       </section>
     </main>
   );

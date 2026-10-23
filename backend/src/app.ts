@@ -38,7 +38,7 @@ export function createApp({
         response.status(429).json({ error: "Too many feedback submissions. Please try again later." }),
       ...rateLimitOptions,
     }),
-    express.json({ limit: "3mb" }),
+    express.json({ limit: "15mb" }),
     async (request, response, next) => {
       const parsed = feedbackSubmissionSchema.safeParse(request.body);
       if (!parsed.success) {
@@ -52,7 +52,7 @@ export function createApp({
       const { profileImage, ...feedbackData } = parsed.data;
       const imageBytes = profileImage ? decodeProfileImage(profileImage) : null;
       if (profileImage && !imageBytes) {
-        response.status(400).json({ error: "Profile picture must be a valid JPEG, PNG, or WebP image no larger than 2 MB." });
+        response.status(400).json({ error: "Profile picture must be a valid JPEG, PNG, or WebP image no larger than 10 MB." });
         return;
       }
 

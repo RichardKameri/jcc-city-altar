@@ -91,6 +91,27 @@ test("public feedback submission stores profile images in external storage", asy
   assert.equal(uploaded.contentType, "image/jpeg");
 });
 
+test("accepts profile images larger than 2 MB within the upload limit", async () => {
+  const imageBytes = Buffer.alloc(3 * 1024 * 1024);
+  imageBytes.set([0xff, 0xd8, 0xff]);
+  let uploadedSize = 0;
+  const app = setup({
+    profileImageStorage: {
+      upload: async (_path, bytes) => { uploadedSize = bytes.byteLength; },
+      download: async () => new Uint8Array(),
+      remove: async () => {},
+    },
+  });
+
+  const response = await request(app).post("/api/feedback").send({
+    ...validFeedback,
+    profileImage: { mimeType: "image/jpeg", data: imageBytes.toString("base64") },
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(uploadedSize, imageBytes.length);
+});
+
 test("rejects profile images with mismatched file content", async () => {
   const app = setup();
   const response = await request(app).post("/api/feedback").send({

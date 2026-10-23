@@ -22,7 +22,7 @@ if (existingBucket) {
   }
   const { error } = await supabase.storage.updateBucket(bucketName, {
     public: false,
-    fileSizeLimit: "2097152",
+    fileSizeLimit: "10485760",
     allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
   });
   if (error) throw error;
@@ -30,7 +30,7 @@ if (existingBucket) {
 } else {
   const { error } = await supabase.storage.createBucket(bucketName, {
     public: false,
-    fileSizeLimit: "2097152",
+    fileSizeLimit: "10485760",
     allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
   });
   if (error) throw error;
