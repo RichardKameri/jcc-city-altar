@@ -55,6 +55,7 @@ export function requireAdminOrigin(adminOrigin: string): RequestHandler {
   return (request, response, next) => {
     const isProduction = process.env.NODE_ENV === "production";
     const origin = request.get("origin");
+    const fetchSite = request.get("sec-fetch-site");
 
     if (origin) {
       if (allowed.includes(normalizeOrigin(origin))) {
@@ -62,7 +63,6 @@ export function requireAdminOrigin(adminOrigin: string): RequestHandler {
         return;
       }
 
-      const fetchSite = request.get("sec-fetch-site");
       if (!isProduction && fetchSite === "same-origin") {
         console.warn("[admin-origin] dev fallback: allowing same-origin request", { origin, allowed });
         next();
@@ -71,6 +71,11 @@ export function requireAdminOrigin(adminOrigin: string): RequestHandler {
 
       console.warn("[admin-origin] rejected", { origin, allowed, fetchSite });
       response.status(403).json({ error: "Origin not allowed" });
+      return;
+    }
+
+    if (fetchSite === "same-origin") {
+      next();
       return;
     }
 

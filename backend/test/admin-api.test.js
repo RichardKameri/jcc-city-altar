@@ -285,6 +285,23 @@ test("feedback moderation requires admin authentication", async () => {
   assert.equal(response.status, 401);
 });
 
+test("production accepts same-origin fetches without an Origin header", async () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  try {
+    const { app } = setup();
+    const response = await request(app)
+      .get("/api/admin/auth/me")
+      .set("Sec-Fetch-Site", "same-origin");
+
+    assert.equal(response.status, 401);
+    assert.deepEqual(response.body, { error: "Authentication required" });
+  } finally {
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+  }
+});
+
 test("admins can retrieve a profile picture from Supabase storage", async () => {
   const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0x00]);
   let requestedPath;
