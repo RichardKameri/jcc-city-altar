@@ -20,6 +20,9 @@ function createTransport() {
   if (!SMTP_HOST || !SMTP_FROM) {
     throw new SmtpConfigurationError();
   }
+  if (SMTP_USER && !SMTP_PASSWORD) {
+    throw new SmtpConfigurationError();
+  }
 
   return {
     from: SMTP_FROM,

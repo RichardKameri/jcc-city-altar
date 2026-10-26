@@ -4,9 +4,9 @@ import theme2026 from "@/assets/theme-2026.jpg";
 import FeedbackSection from "./FeedbackSection";
 
 const stats = [
-  { value: "4+", label: "Years of Ministry" },
-  { value: "250+", label: "Members" },
-  { value: "10+", label: "Programs" },
+  { value: "%+", label: "Years of Ministry" },
+  { value: "700+", label: "Members" },
+  { value: "12+", label: "Programs" },
 ];
  
 const AboutSection = () => {

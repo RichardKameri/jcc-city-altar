@@ -568,7 +568,10 @@ function AdminContacts() {
                 <DialogHeader className="pr-7 text-left">
                   <p className="text-xs font-semibold uppercase tracking-wide text-primary">Reply to message</p>
                   <DialogTitle className="pt-1 text-xl">{replyContact.subject}</DialogTitle>
-                  <DialogDescription className="text-muted-foreground">Replying to {replyContact.name}</DialogDescription>
+                  <DialogDescription className="text-muted-foreground">
+                    Replying to {replyContact.name}
+                    {replyChannel === "email" && " · Sent from jcccityaltar@gmail.com"}
+                  </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={(event) => void sendEmailReply(event)} className="space-y-4">
                   <div className="space-y-2">
