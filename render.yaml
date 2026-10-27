@@ -33,7 +33,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci && npm run prisma:generate && npm run build
-    startCommand: npm run start
+    startCommand: npm run prisma:migrate:deploy && npm run start
     envVars:
       - fromGroup: jcc-city-altar-backend
 
@@ -43,6 +43,6 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci && npm run prisma:generate && npm run build
-    startCommand: npm run start:admin
+    startCommand: npm run prisma:migrate:deploy && npm run start:admin
     envVars:
       - fromGroup: jcc-city-altar-backend

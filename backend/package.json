@@ -14,6 +14,7 @@
     "supabase:setup": "tsx src/setup-profile-image-storage.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed"
   },
   "dependencies": {

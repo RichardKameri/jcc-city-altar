@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Church, Heart, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Church, Heart, Phone, Users } from "lucide-react";
 import theme2026 from "@/assets/theme-2026.jpg";
 import FeedbackSection from "./FeedbackSection";
 
@@ -74,6 +75,58 @@ const AboutSection = () => {
             </motion.div>
           ))}
         </div>
+{/* 
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16 rounded-2xl border border-primary/30 bg-card p-8 md:p-12"
+        >
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-accent font-body font-semibold tracking-[0.2em] uppercase text-sm mb-3">
+              New to the faith or our church?
+            </p>
+            <h3 className="font-display text-3xl md:text-4xl font-black mb-4">
+              Your Next Steps
+            </h3>
+            <p className="text-muted-foreground font-body text-lg leading-relaxed">
+              We would love to walk with you as you grow in faith and find community.
+            </p>
+          </div>
+
+          <ol className="mx-auto mt-8 max-w-3xl space-y-4">
+            {[
+              <>
+                Join <Link to="/contact" className="font-semibold text-primary underline-offset-4 hover:underline">SOS</Link>, a class for new believers and members who have recently joined, with teaching to help you grow in faith.
+              </>,
+              <>Begin to pray daily.</>,
+              <>Begin to study the Bible daily.</>,
+              <>
+                Join a <Link to="/ministries/discipleship" className="font-semibold text-primary underline-offset-4 hover:underline">GCC</Link> for home fellowship and discipleship.
+              </>,
+              <>
+                Join a <Link to="/services" className="font-semibold text-primary underline-offset-4 hover:underline">church worship service</Link>.
+              </>,
+            ].map((step, index) => (
+              <li key={index} className="flex items-start gap-4 rounded-xl border border-border bg-background/60 p-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-purple-gradient font-display font-bold text-primary-foreground">
+                  {index + 1}
+                </span>
+                <span className="pt-1 font-body text-base leading-relaxed text-foreground/90">{step}</span>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-8 text-center">
+            <a
+              href="tel:0712316316"
+              className="inline-flex items-center gap-2 rounded-full bg-vibrant-gradient px-7 py-3 font-body font-bold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              <Phone size={18} aria-hidden="true" />
+              Contact us about salvation: 0712316316
+            </a>
+          </div>
+        </motion.div> */}
 
         {/* Theme */}
         <motion.div

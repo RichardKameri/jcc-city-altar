@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, Download, LoaderCircle, LogOut, MessageSquareQuote, RefreshCw, Star, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Download, Inbox, LoaderCircle, LogOut, MessageSquareQuote, RefreshCw, Star, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "./src/components/ui/badge";
 import { Button } from "./src/components/ui/button";
@@ -146,29 +146,33 @@ export default function AdminFeedbacks() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex min-h-16 max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-7 lg:px-10">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground"><MessageSquareQuote size={18} /></span>
-            <div><p className="text-sm font-semibold">JCC City Altar Admin</p><p className="text-xs text-muted-foreground">Feedback moderation</p></div>
+            <div className="min-w-0"><p className="truncate text-sm font-semibold">JCC City Altar Admin</p><p className="text-xs text-muted-foreground">Feedback moderation</p></div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/contacts")} className="border-border bg-card">Contact requests</Button>
-            <Button variant="ghost" onClick={() => void signOut()} className="text-muted-foreground"><LogOut size={16} /><span className="hidden sm:inline">Sign out</span></Button>
+          <div className="flex shrink-0 gap-1 sm:gap-2">
+            <Button variant="outline" size="icon" aria-label="Contact requests" onClick={() => navigate("/contacts")} className="border-border bg-card sm:w-auto sm:px-3">
+              <Inbox /><span className="hidden sm:inline">Contact requests</span>
+            </Button>
+            <Button variant="ghost" size="icon" aria-label="Sign out" onClick={() => void signOut()} className="text-muted-foreground sm:w-auto sm:px-3">
+              <LogOut size={16} /><span className="hidden sm:inline">Sign out</span>
+            </Button>
           </div>
         </div>
       </header>
       <main className="mx-auto max-w-[1200px] px-4 pb-12 pt-8 sm:px-7 sm:pt-10 lg:px-10">
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
+          <div className="min-w-0">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Administration</p>
-            <h1 className="text-3xl font-semibold">Feedback</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Approve submissions, then choose which approved feedback appears on the About page.</p>
+            <h1 className="text-2xl font-semibold sm:text-3xl">Feedback</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Approve submissions, then choose which approved feedback appears on the About page.</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => void downloadFeedbackPdf()} disabled={downloading} className="border-border bg-card">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button variant="outline" onClick={() => void downloadFeedbackPdf()} disabled={downloading} className="w-full border-border bg-card sm:w-auto">
               {downloading ? <LoaderCircle className="animate-spin" /> : <Download />} Download PDF
             </Button>
             <Select value={status} onValueChange={(value) => { setStatus(value); setPage(1); }}>
-              <SelectTrigger aria-label="Filter feedback by status" className="w-40 border-border bg-card"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Filter feedback by status" className="w-full border-border bg-card sm:w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All feedback</SelectItem>
                 <SelectItem value="PENDING">Pending</SelectItem>
@@ -176,7 +180,7 @@ export default function AdminFeedbacks() {
                 <SelectItem value="REJECTED">Rejected</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => setRefreshIndex((current) => current + 1)} disabled={loading} className="border-border bg-card">
+            <Button variant="outline" onClick={() => setRefreshIndex((current) => current + 1)} disabled={loading} className="w-full border-border bg-card sm:w-auto">
               {loading ? <LoaderCircle className="animate-spin" /> : <RefreshCw />} Refresh
             </Button>
           </div>
@@ -190,7 +194,7 @@ export default function AdminFeedbacks() {
           ) : data.map((feedback) => {
             const busy = busyId === feedback.id;
             return (
-              <article key={feedback.id} className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
+              <article key={feedback.id} className="flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     {feedback.profileImageType && (
@@ -208,19 +212,19 @@ export default function AdminFeedbacks() {
                   <p className="mt-1 text-xs text-muted-foreground">{formatDate(feedback.createdAt)}</p>
                   <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-foreground">{feedback.message}</p>
                 </div>
-                <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+                <div className="flex w-full shrink-0 flex-wrap gap-2 sm:justify-end md:w-auto">
                   {feedback.status !== "APPROVED" && (
-                    <Button size="sm" onClick={() => void updateFeedback(feedback, { status: "APPROVED" })} disabled={busy}>
+                    <Button size="sm" onClick={() => void updateFeedback(feedback, { status: "APPROVED" })} disabled={busy} className="flex-1 sm:flex-none">
                       {busy ? <LoaderCircle className="animate-spin" /> : <Check />} Approve
                     </Button>
                   )}
                   {feedback.status !== "REJECTED" && (
-                    <Button size="sm" variant="outline" onClick={() => void updateFeedback(feedback, { status: "REJECTED" })} disabled={busy} className="border-border bg-background">
+                    <Button size="sm" variant="outline" onClick={() => void updateFeedback(feedback, { status: "REJECTED" })} disabled={busy} className="flex-1 border-border bg-background sm:flex-none">
                       <X /> Reject
                     </Button>
                   )}
                   {feedback.status === "APPROVED" && (
-                    <Button size="sm" variant={feedback.featured ? "secondary" : "outline"} onClick={() => void updateFeedback(feedback, { featured: !feedback.featured })} disabled={busy} className={feedback.featured ? "" : "border-border bg-background"}>
+                    <Button size="sm" variant={feedback.featured ? "secondary" : "outline"} onClick={() => void updateFeedback(feedback, { featured: !feedback.featured })} disabled={busy} className={`w-full sm:w-auto ${feedback.featured ? "" : "border-border bg-background"}`}>
                       <Star /> {feedback.featured ? "Remove from About" : "Show on About"}
                     </Button>
                   )}
@@ -228,14 +232,14 @@ export default function AdminFeedbacks() {
               </article>
             );
           })}
-          <footer className="flex flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <footer className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <p className="text-xs text-muted-foreground">
               {pagination.totalItems === 0 ? "0 submissions" : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, pagination.totalItems)} of ${pagination.totalItems}`}
             </p>
-            <div className="flex items-center justify-end gap-2">
-              <Button variant="outline" size="sm" aria-label="Previous page" disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)} className="border-border bg-card"><ChevronLeft /> Previous</Button>
+            <div className="flex items-center justify-between gap-1 sm:justify-end sm:gap-2">
+              <Button variant="outline" size="sm" aria-label="Previous page" disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)} className="border-border bg-card px-2 sm:px-3"><ChevronLeft /><span className="hidden sm:inline">Previous</span></Button>
               <span className="min-w-[74px] text-center text-xs text-muted-foreground">Page {page} of {Math.max(pagination.totalPages, 1)}</span>
-              <Button variant="outline" size="sm" aria-label="Next page" disabled={page >= pagination.totalPages || loading} onClick={() => setPage((value) => value + 1)} className="border-border bg-card">Next <ChevronRight /></Button>
+              <Button variant="outline" size="sm" aria-label="Next page" disabled={page >= pagination.totalPages || loading} onClick={() => setPage((value) => value + 1)} className="border-border bg-card px-2 sm:px-3"><span className="hidden sm:inline">Next</span><ChevronRight /></Button>
             </div>
           </footer>
         </section>

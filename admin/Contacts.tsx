@@ -325,7 +325,7 @@ function AdminContacts() {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">JCC City Altar Admin</p>
-                <p className="text-xs text-muted-foreground">Contact & Demo Requests</p>
+                <p className="text-xs text-muted-foreground">Contact Requests</p>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1">
@@ -348,31 +348,30 @@ function AdminContacts() {
 
         <main className="mx-auto max-w-[1440px] px-4 pb-12 pt-8 sm:px-7 sm:pt-10 lg:px-10">
           <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
+            <div className="min-w-0">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Administration</p>
-              <h1 className="text-3xl font-semibold tracking-normal text-foreground">JCC City Altar Admin - Contact &amp; Demo Requests</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Review and manage incoming contact and demo requests.</p>
+              <h1 className="text-2xl font-semibold tracking-normal text-foreground sm:text-3xl">JCC City Altar Admin - Contact Requests</h1>
+              <p className="mt-2 text-sm text-muted-foreground">Review and manage incoming contact requests.</p>
             </div>
-            <div className="flex items-center gap-2 self-end">
-              <Button variant="outline" onClick={() => void downloadMessagesPdf()} disabled={downloadingMessages} className="border-border bg-card text-foreground">
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end">
+              <Button variant="outline" onClick={() => void downloadMessagesPdf()} disabled={downloadingMessages} className="w-full border-border bg-card text-foreground sm:w-auto">
                 {downloadingMessages ? <LoaderCircle className="animate-spin" /> : <Download />}
-                <span className="hidden sm:inline">Download messages</span>
-                <span className="sm:hidden">PDF</span>
+                <span>Download PDF</span>
               </Button>
-              <Button variant="outline" onClick={() => navigate("/feedback")} className="border-border bg-card text-foreground">
+              <Button variant="outline" onClick={() => navigate("/feedback")} className="w-full border-border bg-card text-foreground sm:w-auto">
                 <MessageSquareQuote /> Feedback
               </Button>
-              <Button variant="outline" onClick={() => navigate("/invite")} className="border-border bg-card text-foreground">
+              <Button variant="outline" onClick={() => navigate("/invite")} className="w-full border-border bg-card text-foreground sm:w-auto">
                 <UserPlus /> Invite admin
               </Button>
-              <Button asChild variant="link" className="text-primary">
+              <Button asChild variant="outline" className="w-full border-border bg-card text-primary sm:w-auto">
                 <a href="#request-list">View details <ArrowRight /></a>
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setRefreshIndex((value) => value + 1)}
                 disabled={listLoading}
-                className="border-border bg-card text-foreground"
+                className="col-span-2 w-full border-border bg-card text-foreground sm:col-span-1 sm:w-auto"
               >
                 {listLoading ? <LoaderCircle className="animate-spin" /> : <RefreshCw />}
                 Refresh
@@ -380,17 +379,17 @@ function AdminContacts() {
             </div>
           </div>
 
-          <section aria-label="Request totals" className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <section aria-label="Request totals" className="mb-8 grid grid-cols-2 gap-3 xl:grid-cols-4">
             {metrics.map(({ label, value, icon: Icon, accent, wash }) => (
-              <article key={label} className="flex min-h-[104px] items-center justify-between border border-border bg-card px-5 py-4 shadow-sm">
+              <article key={label} className="flex min-h-[96px] items-center justify-between gap-2 border border-border bg-card px-3 py-3 shadow-sm sm:min-h-[104px] sm:px-5 sm:py-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{label}</p>
-                  <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground">
+                  <p className="text-xs font-medium text-muted-foreground sm:text-sm">{label}</p>
+                  <p className="mt-2 text-xl font-semibold tabular-nums text-foreground sm:text-2xl">
                     {value === undefined ? <span className="text-muted-foreground">—</span> : value.toLocaleString()}
                   </p>
                 </div>
-                <span className={`flex h-10 w-10 items-center justify-center rounded-md ${wash} ${accent}`}>
-                  <Icon size={19} aria-hidden="true" />
+                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md sm:h-10 sm:w-10 ${wash} ${accent}`}>
+                  <Icon size={17} aria-hidden="true" />
                 </span>
               </article>
             ))}
@@ -426,7 +425,7 @@ function AdminContacts() {
 
             {error && <div role="alert" className="border-b border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800">{error}</div>}
 
-            <div className="overflow-x-auto">
+            <div className="hidden overflow-x-auto lg:block">
               <Table className="min-w-[1000px]">
                 <TableHeader className="bg-muted">
                   <TableRow className="hover:bg-muted">
@@ -511,17 +510,66 @@ function AdminContacts() {
               </Table>
             </div>
 
-            <footer className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="divide-y divide-border lg:hidden">
+              {listLoading && contacts.length === 0 ? (
+                <p className="p-8 text-center text-sm text-muted-foreground"><LoaderCircle className="mr-2 inline animate-spin" size={17} /> Loading messages</p>
+              ) : contacts.length === 0 ? (
+                <p className="p-8 text-center text-sm text-muted-foreground">{settledSearch || statusFilter !== "ALL" ? "No matching messages." : "No messages yet."}</p>
+              ) : contacts.map((contact) => {
+                const nextLabel = {
+                  PENDING: "Move to in progress",
+                  IN_PROGRESS: "Mark as responded",
+                  RESPONDED: "Reopen request",
+                }[contact.status];
+                const isBusy = busyId === contact.id;
+                return (
+                  <article key={contact.id} className="space-y-3 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h2 className="break-words font-semibold text-foreground">{contact.subject}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">{contact.name}</p>
+                      </div>
+                      <Badge variant="outline" className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${statusStyles[contact.status]}`}>
+                        {contact.status.replace("_", " ").toLowerCase()}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <a href={`mailto:${contact.email}`} className="block break-all text-primary hover:underline">{contact.email}</a>
+                      {contact.phone && <a href={`tel:${contact.phone}`} className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary"><Phone size={13} aria-hidden="true" />{contact.phone}</a>}
+                    </div>
+                    <p className="line-clamp-3 break-words text-sm leading-6 text-muted-foreground">{contact.message}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(contact.createdAt)}</p>
+                    <div className="grid grid-cols-3 gap-2 border-t border-border pt-2">
+                      <Button variant="outline" size="sm" aria-label={nextLabel} title={nextLabel} disabled={isBusy} onClick={() => void changeStatus(contact)} className="w-full border-border bg-background px-2">
+                        {contact.status === "PENDING" ? <Clock3 /> : contact.status === "IN_PROGRESS" ? <RefreshCw /> : <Check />}
+                        Update
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedContact(contact)} className="w-full border-border bg-background px-2">
+                        <Eye /> View
+                      </Button>
+                      <Button variant="outline" size="sm" aria-label="Delete message" disabled={isBusy} onClick={() => setPendingDelete(contact)} className="w-full border-border bg-background px-2 text-red-700 hover:bg-red-50">
+                        <Trash2 /> Delete
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => openReply(contact)} className="col-span-3 w-full border-border bg-background text-primary">
+                        <Reply /> Reply
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <footer className="flex flex-col gap-3 border-t border-border px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <p className="text-xs text-muted-foreground">
                 {pagination.totalItems === 0 ? "0 messages" : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, pagination.totalItems)} of ${pagination.totalItems}`}
               </p>
-              <div className="flex items-center justify-end gap-2">
+              <div className="flex items-center justify-between gap-1 sm:justify-end sm:gap-2">
                 <Button variant="outline" size="sm" aria-label="Previous page" disabled={page <= 1 || listLoading} onClick={() => setPage((value) => value - 1)} className="border-border bg-card">
-                  <ChevronLeft /> Previous
+                  <ChevronLeft /><span className="hidden sm:inline">Previous</span>
                 </Button>
                 <span className="min-w-[74px] text-center text-xs tabular-nums text-muted-foreground">Page {page} of {Math.max(pagination.totalPages, 1)}</span>
                 <Button variant="outline" size="sm" aria-label="Next page" disabled={page >= pagination.totalPages || listLoading} onClick={() => setPage((value) => value + 1)} className="border-border bg-card">
-                  Next <ChevronRight />
+                  <span className="hidden sm:inline">Next</span><ChevronRight />
                 </Button>
               </div>
             </footer>

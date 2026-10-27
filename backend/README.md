@@ -12,7 +12,7 @@ TypeScript REST API for the public contact form and authenticated admin dashboar
 6. Seed the admin user with `npm run db:seed`.
 7. Start the public API with `npm run dev` and the admin API with `npm run dev:admin`.
 
-For deployments, apply checked-in migrations with `npx prisma migrate deploy` from this directory before starting the API.
+For deployments outside the included Render Blueprint, apply checked-in migrations with `npm run prisma:migrate:deploy` from this directory before starting the API. The Render services run this command automatically before startup.
 
 ## Deployment
 
@@ -20,7 +20,7 @@ The repository includes a Render Blueprint for the public and admin APIs. Deploy
 
 For the admin phase on Netlify, create a site from this repository with base directory `admin`, build command `npm run build`, and publish directory `dist`. Its checked-in `_redirects` file proxies `/api` to the separate admin API and falls back to `index.html` for client-side routes. The URL `https://jcc-city-altar-api.onrender.com` is the public API; the admin proxy must target `https://jcc-city-altar-admin-api.onrender.com`. Set `ADMIN_ORIGIN` to the exact Netlify site URL so login cookies and origin checks work. Deploy the public frontend later as a separate Netlify site with base directory `frontend`, the same build command and publish directory; its rewrite targets the public API. Keep the Render service names in both redirect files aligned with `render.yaml`.
 
-Before deploying the API, point `backend/.env` at the Supabase PostgreSQL database, run `npx prisma migrate deploy`, and seed the initial admin with `npm run db:seed`. If you need to preserve existing contact, feedback, and admin records from another PostgreSQL database, export/import that data separately; migrations create the schema but do not copy application records. Keep `ADMIN_EMAIL` and `ADMIN_PASSWORD` available only to the one-time seed command, not the frontend. Free-tier services may sleep or have usage limits, so verify the current provider limits before relying on them for production.
+Before deploying the API, point `backend/.env` at the Supabase PostgreSQL database and seed the initial admin with `npm run db:seed`. The Render start commands apply checked-in migrations automatically before launching either API. If you need to preserve existing contact, feedback, and admin records from another PostgreSQL database, export/import that data separately; migrations create the schema but do not copy application records. Keep `ADMIN_EMAIL` and `ADMIN_PASSWORD` available only to the one-time seed command, not the frontend. Free-tier services may sleep or have usage limits, so verify the current provider limits before relying on them for production.
 
 The public API listens on port 3000 by default, while the admin API listens on `ADMIN_API_PORT` (default 3100). In development, the admin frontend proxies `/api` requests to `http://localhost:3100`; leave `VITE_ADMIN_API_URL` unset so browser requests remain same-origin. Set `ADMIN_ORIGIN` to the exact URL used to open the admin app.
 
