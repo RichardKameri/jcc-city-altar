@@ -199,16 +199,6 @@ const ContactSection = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
-                type="tel"
-                name="phone"
-                placeholder="Phone number (optional)"
-                value={formData.phone}
-                onChange={handleChange}
-                autoComplete="tel"
-                className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-
-              <input
                 type="text"
                 name="name"
                 placeholder="Your Name"
@@ -225,6 +215,16 @@ const ContactSection = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone number (optional)"
+                value={formData.phone}
+                onChange={handleChange}
+                autoComplete="tel"
                 className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
               />
 
