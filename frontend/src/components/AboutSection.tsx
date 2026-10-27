@@ -5,7 +5,7 @@ import FeedbackSection from "./FeedbackSection";
 
 const stats = [
   { value: "5+", label: "Years of Ministry" },
-  { value: "700+", label: "Members" },
+  { value: "400+", label: "Members" },
   { value: "12+", label: "Programs" },
 ];
  
