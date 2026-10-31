@@ -27,6 +27,14 @@ envVarGroups:
         value: "1"
       - key: NODE_OPTIONS
         value: --dns-result-order=ipv4first
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GMAIL_OAUTH_CLIENT_ID
+        sync: false
+      - key: GMAIL_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_OAUTH_REFRESH_TOKEN
+        sync: false
 
 services:
   - type: web

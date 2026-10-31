@@ -3,7 +3,7 @@ import { ContactSubmissionStatus, Prisma, type ContactSubmission, type PrismaCli
 import { Router, type Response } from "express";
 import { z } from "zod";
 import { isAdmin, requireAdminOrigin } from "../middleware/auth-middleware.js";
-import { sendContactReply, SmtpConfigurationError } from "../mailer.js";
+import { sendContactReply, EmailConfigurationError } from "../mailer.js";
 
 type ContactDelegate = PrismaClient["contactSubmission"];
 type SendReply = (submission: ContactSubmission, message: string) => Promise<void>;
@@ -211,7 +211,7 @@ export function createAdminContactsRouter(
       await sendReply(contact, parsed.data.message);
       response.status(200).json({ sent: true });
     } catch (error) {
-      if (error instanceof SmtpConfigurationError) {
+      if (error instanceof EmailConfigurationError) {
         response.status(503).json({ error: error.message });
         return;
       }
