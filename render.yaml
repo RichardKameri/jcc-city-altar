@@ -25,6 +25,8 @@ envVarGroups:
         value: jcccityaltar@gmail.com
       - key: TRUST_PROXY_HOPS
         value: "1"
+      - key: NODE_OPTIONS
+        value: --dns-result-order=ipv4first
 
 services:
   - type: web
